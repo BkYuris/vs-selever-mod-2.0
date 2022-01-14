@@ -1,5 +1,6 @@
 package;
 
+import flixel.animation.FlxAnimation;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.animation.FlxBaseAnimation;
@@ -73,7 +74,8 @@ class Character extends FlxSprite
 	public var noAntialiasing:Bool = false;
 	public var originalFlipX:Bool = false;
 	public var healthColorArray:Array<Int> = [255, 0, 0];
-	public var alreadyLoaded:Bool = true; //Used by "Change Character" event
+
+	public var animations:Array<FlxAnimation> = []; //
 
 	public static var DEFAULT_CHARACTER:String = 'bf'; //In case a character is missing, it will use BF on its place
 	public function new(x:Float, y:Float, ?character:String = 'bf', ?isPlayer:Bool = false)
@@ -96,21 +98,34 @@ class Character extends FlxSprite
 
 			default:
 				var characterPath:String = 'characters/' + curCharacter + '.json';
+				#if MODS_ALLOWED
 				var path:String = Paths.modFolders(characterPath);
 				if (!FileSystem.exists(path)) {
-					path = Main.getDataPath() + Paths.getPreloadPath(characterPath);
+					path = Paths.getPreloadPath(characterPath);
 				}
 
 				if (!FileSystem.exists(path))
+				#else
+				var path:String = Paths.getPreloadPath(characterPath);
+				if (!Assets.exists(path))
+				#end
 				{
-					path = Main.getDataPath() + Paths.getPreloadPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
+					path = Paths.getPreloadPath('characters/' + DEFAULT_CHARACTER + '.json'); //If a character couldn't be found, change him to BF just to prevent a crash
 				}
 
+				#if MODS_ALLOWED
 				var rawJson = File.getContent(path);
+				#else
+				var rawJson = Assets.getText(path);
+				#end
 
 				var json:CharacterFile = cast Json.parse(rawJson);
+				#if MODS_ALLOWED
 				var txtToFind:String = Paths.getPath('images/' + json.image + '.txt', TEXT);
 				if(FileSystem.exists(txtToFind) || Assets.exists(txtToFind))
+				#else
+				if(Assets.exists(Paths.getPath('images/' + json.image + '.txt', TEXT)))
+				#end
 				{
 				//bozo forgot about the packer shits : P
 					frames = Paths.getPackerAtlas(json.image);
@@ -161,6 +176,7 @@ class Character extends FlxSprite
 						if(anim.offsets != null && anim.offsets.length > 1) {
 							addOffset(anim.anim, anim.offsets[0], anim.offsets[1]);
 						}
+						animations.push(animation.getByName(animAnim)); //
 					}
 				} else {
 					quickAnimAdd('idle', 'BF idle dance');

@@ -20,6 +20,7 @@ using StringTools;
 class Paths
 {
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
+	inline public static var VIDEO_EXT = "mp4";
 
 	#if MODS_ALLOWED
 	#if (haxe >= "4.0.0")
@@ -140,7 +141,7 @@ class Paths
 			return file;
 		}
 		#end
-		return Main.getDataPath() + 'assets/videos/$key.webm';
+		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 
 	static public function sound(key:String, ?library:String):Dynamic
@@ -184,7 +185,7 @@ class Paths
 			return file;
 		}
 		#end
-		return returnSongFile(Main.getDataPath() + 'assets/songs/${song.toLowerCase().replace(' ', '-')}/Voices.$SOUND_EXT');
+		return 'songs:assets/songs/${song.toLowerCase().replace(' ', '-')}/Voices.$SOUND_EXT';
 	}
 
 	inline static public function inst(song:String):Any
@@ -195,7 +196,7 @@ class Paths
 			return file;
 		}
 		#end
-		return returnSongFile(Main.getDataPath() + 'assets/songs/${song.toLowerCase().replace(' ', '-')}/Inst.$SOUND_EXT');
+		return 'songs:assets/songs/${song.toLowerCase().replace(' ', '-')}/Inst.$SOUND_EXT';
 	}
 
 	#if MODS_ALLOWED
@@ -238,21 +239,21 @@ class Paths
 			return File.getContent(mods(key));
 		#end
 
-		if (FileSystem.exists(Main.getDataPath() + getPreloadPath(key)))
-			return File.getContent(Main.getDataPath() + getPreloadPath(key));
+		if (FileSystem.exists(getPreloadPath(key)))
+			return File.getContent(getPreloadPath(key));
 
 		if (currentLevel != null)
 		{
 			var levelPath:String = '';
 			if(currentLevel != 'shared') {
 				levelPath = getLibraryPathForce(key, currentLevel);
-				if (FileSystem.exists(Main.getDataPath() + levelPath))
+				if (FileSystem.exists(levelPath))
 					return File.getContent(levelPath);
 			}
 
 			levelPath = getLibraryPathForce(key, 'shared');
-			if (FileSystem.exists(Main.getDataPath() + levelPath))
-				return File.getContent(Main.getDataPath() + levelPath);
+			if (FileSystem.exists(levelPath))
+				return File.getContent(levelPath);
 		}
 		#end
 		return Assets.getText(getPath(key, TEXT));
@@ -333,7 +334,7 @@ class Paths
 	}
 
 	inline static public function mods(key:String = '') {
-		return Main.getDataPath() + 'mods/' + key;
+		return 'mods/' + key;
 	}
 	
 	inline static public function modsFont(key:String) {
@@ -345,7 +346,7 @@ class Paths
 	}
 
 	inline static public function modsVideo(key:String) {
-		return modFolders('videos/' + key + '.webm');
+		return modFolders('videos/' + key + '.' + VIDEO_EXT);
 	}
 
 	inline static public function modsMusic(key:String) {
@@ -379,7 +380,7 @@ class Paths
 				return fileToCheck;
 			}
 		}
-		return Main.getDataPath() + 'mods/' + key;
+		return 'mods/' + key;
 	}
 
 	static public function getModDirectories():Array<String> {
